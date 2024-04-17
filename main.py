@@ -2,7 +2,7 @@ import sys, datetime, pandas as pd
 
 from datetime import timedelta
 from PySide6.QtCore import QObject, Slot
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtGui import QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine, QmlElement
 from PySide6.QtQuickControls2 import QQuickStyle
 
@@ -23,6 +23,7 @@ class Timesheet(QObject):
         super().__init__()
         self.timesheetString = ""
         self.displayedPlayers = []
+        self.timezone = 0
 
     @Slot(str)
     def loadCSV(self, file):
@@ -91,10 +92,11 @@ class Timesheet(QObject):
     
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
+    app.setWindowIcon(QIcon('./lib/images/calendar.png'))
     QQuickStyle.setStyle("Material")
     engine = QQmlApplicationEngine()
 
-    qml_file = 'gui.qml'
+    qml_file = './lib/qml/gui.qml'
     engine.load(qml_file)
 
     sys.exit(app.exec())

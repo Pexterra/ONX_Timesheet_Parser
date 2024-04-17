@@ -5,13 +5,14 @@
     <ProjectGuid>9ec43fbb-dfd0-4f40-8c6d-10eaf53ab373</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>lib\timesheetParser.py</StartupFile>
+    <StartupFile>main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
-    <Name>ONX_Timesheet_Parser</Name>
+    <Name>ONX_Excel_Parser</Name>
     <RootNamespace>PyQTAnwendung</RootNamespace>
+    <SuppressEnvironmentCreationPrompt>True</SuppressEnvironmentCreationPrompt>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,13 +23,17 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="main.py" />
+  </ItemGroup>
+  <ItemGroup>
     <Folder Include="lib\" />
+    <Folder Include="lib\images\" />
+    <Folder Include="lib\qml\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="lib\main.qml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="lib\timesheetParser.py" />
+    <Content Include="lib\images\calendar.ico" />
+    <Content Include="lib\images\calendar.png" />
+    <Content Include="lib\qml\gui.qml" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

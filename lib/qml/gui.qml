@@ -16,7 +16,7 @@ ApplicationWindow {
     visible: true
     Material.theme: Material.Dark
     Material.accent: Material.Purple
-    title: qsTr("ONX Timesheet Parser")
+    title: qsTr("ONX Excel Parser")
 
     Timesheet {
         id: timesheet
