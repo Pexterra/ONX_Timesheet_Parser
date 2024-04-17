@@ -94,7 +94,7 @@ if __name__ == '__main__':
     QQuickStyle.setStyle("Material")
     engine = QQmlApplicationEngine()
 
-    qml_file = 'lib/main.qml'
+    qml_file = 'gui.qml'
     engine.load(qml_file)
 
     sys.exit(app.exec())
