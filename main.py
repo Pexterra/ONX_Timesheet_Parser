@@ -58,7 +58,7 @@ class Timesheet(QObject):
         self.players.sort(key=lambda x: x.loggedTime, reverse=True)
         for player in self.players:
             if player.loggedTime > datetime.timedelta(0):
-                self.timesheetString +=  "{}     {}".format(str(player.loggedTime).rjust(17),player.name) + '\n'
+                self.timesheetString += f"{str(player.loggedTime).rjust(17)}     {player.name}\n"
                 self.displayedPlayers.append(player.name)
         self.displayedPlayers.sort()
         self.displayedPlayers.insert(0, "Overview")
@@ -83,10 +83,10 @@ class Timesheet(QObject):
             output = ""
             for player in self.players:
                 if player.name == playerSelection:
-                    output += "{} - clocked time: {}".format(player.name, str(player.loggedTime).rjust(17)) + '\n\n'
+                    output += f"{player.name} - clocked time: {str(player.loggedTime).rjust(17)}\n\n"
                     output += f"UTC{self.timezone}" + '\n'
                     for i in range(0, min(len(player.logins),len(player.logouts))):
-                        output +=  "in: {}  -  out: {}".format(str(player.logins[i]),str(player.logouts[i])) + '\n'
+                        output += f"in: {str(player.logins[i])}  -  out: {str(player.logouts[i])}\n"
             return output
 
     
