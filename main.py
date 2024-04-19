@@ -44,10 +44,8 @@ class Timesheet(QObject):
             if df.Action[i] == 'Check Out' and player.loggedIn == True:
                 player.logouts.append(df.Time[i]+ timedelta(hours=self.timezone))
                 player.loggedIn = False
-
-        for player in playersDictionary.values():
-            for i in range(0, min(len(player.logins),len(player.logouts))):
-                player.loggedTime = player.loggedTime + (player.logouts[i] - player.logins[i])
+                # If they were logged in, then logged out we can use last logout and login to calculate time without re-looping
+                player.loggedTime = player.loggedTime + (player.logouts[-1] - player.logins[-1])
 
         self.players = sorted(playersDictionary.values(), key=lambda x: x.loggedTime, reverse=True)
         for player in self.players:
