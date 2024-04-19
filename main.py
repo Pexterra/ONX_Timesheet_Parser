@@ -32,7 +32,7 @@ class Timesheet(QObject):
         xls = pd.ExcelFile(file)
         timezone = xls.parse('Actions', index_col=3, )
         df = xls.parse('Actions', skiprows=3, skipcolumns=1)
-        self.players : Player = []
+        self.players : list[Player] = []
         registered = []
         for name in df.Name:
             if name not in registered:
