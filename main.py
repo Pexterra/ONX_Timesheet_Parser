@@ -1,4 +1,5 @@
-import sys, datetime, pandas as pd
+import sys, datetime, math
+import pandas as pd
 from typing import Dict
 
 from datetime import timedelta
@@ -52,7 +53,7 @@ class Timesheet(QObject):
         
         for player in self.players:
             if player.loggedTime > datetime.timedelta(0):
-                self.timesheetString += f"{str(player.loggedTime).rjust(17)}     {player.name}\n"
+                self.timesheetString += self._getTimedeltaStringHM(player.loggedTime).ljust(10) + f"\t - {player.name}\n"
                 self.displayedPlayers.append(player.name)
 
         self.displayedPlayers.append("Overview")
@@ -78,13 +79,24 @@ class Timesheet(QObject):
             output = ""
             for player in self.players:
                 if player.name == playerSelection:
-                    output += f"{player.name} - clocked time: {str(player.loggedTime).rjust(17)}\n\n"
+                    output += f"{player.name} - clocked time: {self._getTimedeltaStringHM(player.loggedTime)}\n\n"
                     output += f"UTC{self.timezone}" + '\n'
                     for i in range(0, min(len(player.logins),len(player.logouts))):
-                        output += f"in: {str(player.logins[i])}  -  out: {str(player.logouts[i])}\n"
+                        output += f"in: {str(player.logins[i])}  -  out: {str(player.logouts[i])}"
+                        output += f" - {self._getTimedeltaStringHM(player.logouts[i] - player.logins[i])}"
+                        output += "\n"
             return output
 
-    
+    def _getTimedeltaStringHM(self, delta):
+        sec = delta.total_seconds()
+        hours = math.ceil(sec // 3600)
+        minutes = math.ceil((sec // 60) - (hours * 60))
+        if minutes < 10:
+            minuteStr = "0" + str(minutes)
+        else:
+            minuteStr = str(minutes)
+        return(f'{str(hours).rjust(5)}h {minuteStr}m')
+
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
     app.setWindowIcon(QIcon('./lib/images/calendar.png'))

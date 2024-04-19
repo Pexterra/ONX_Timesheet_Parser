@@ -92,6 +92,7 @@ ApplicationWindow {
                 id: output
                 text: ""
                 wrapMode: TextArea.Wrap
+                font.letterSpacing: 1
             }
 
             ScrollBar.vertical: ScrollBar { }
