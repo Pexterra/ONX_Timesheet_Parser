@@ -28,8 +28,6 @@ class Timesheet(QObject):
 
     @Slot(str)
     def loadCSV(self, file):
-        self.timesheetString = ""
-        self.displayedPlayers = []
         xls = pd.ExcelFile(file)
         timezone = xls.parse('Actions', index_col=3, )
         df = xls.parse('Actions', skiprows=3, skipcolumns=1)
@@ -48,12 +46,17 @@ class Timesheet(QObject):
                 player.loggedTime = player.loggedTime + (player.logouts[-1] - player.logins[-1])
 
         self.players = sorted(playersDictionary.values(), key=lambda x: x.loggedTime, reverse=True)
+        
+        self.timesheetString = ""
+        self.displayedPlayers = []
+        
         for player in self.players:
             if player.loggedTime > datetime.timedelta(0):
                 self.timesheetString += f"{str(player.loggedTime).rjust(17)}     {player.name}\n"
                 self.displayedPlayers.append(player.name)
-        self.displayedPlayers.sort()
-        self.displayedPlayers.insert(0, "Overview")
+
+        self.displayedPlayers.append("Overview")
+        self.displayedPlayers.reverse()
 
     @Slot(str)
     def setTimezone(self, timezone):
