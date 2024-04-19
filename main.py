@@ -37,16 +37,13 @@ class Timesheet(QObject):
         playersDictionary: Dict[str, Player] = {name: Player(name) for name in df['Name'].unique()}
 
         for i in range(0, len(df.Action)):
-            for player in playersDictionary.values():
-                if df.Name[i] == player.name:
-                    if df.Action[i] == 'Check In' and player.loggedIn == False:
-                        player.logins.append(df.Time[i] + timedelta(hours=self.timezone))
-                        player.loggedIn = True
-                        break
-                    if df.Action[i] == 'Check Out' and player.loggedIn == True:
-                        player.logouts.append(df.Time[i]+ timedelta(hours=self.timezone))
-                        player.loggedIn = False
-                        break
+            player = playersDictionary[df.Name[i]]
+            if df.Action[i] == 'Check In' and player.loggedIn == False:
+                player.logins.append(df.Time[i] + timedelta(hours=self.timezone))
+                player.loggedIn = True
+            if df.Action[i] == 'Check Out' and player.loggedIn == True:
+                player.logouts.append(df.Time[i]+ timedelta(hours=self.timezone))
+                player.loggedIn = False
 
         for player in playersDictionary.values():
             for i in range(0, min(len(player.logins),len(player.logouts))):
