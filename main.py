@@ -1,4 +1,5 @@
 import sys, datetime, pandas as pd
+from typing import Dict
 
 from datetime import timedelta
 from PySide6.QtCore import QObject, Slot
@@ -32,15 +33,11 @@ class Timesheet(QObject):
         xls = pd.ExcelFile(file)
         timezone = xls.parse('Actions', index_col=3, )
         df = xls.parse('Actions', skiprows=3, skipcolumns=1)
-        self.players : list[Player] = []
-        registered = []
-        for name in df.Name:
-            if name not in registered:
-                registered.append(name)
-                self.players.append(Player(name))
+        
+        playersDictionary: Dict[str, Player] = {name: Player(name) for name in df['Name'].unique()}
 
         for i in range(0, len(df.Action)):
-            for player in self.players:
+            for player in playersDictionary.values():
                 if df.Name[i] == player.name:
                     if df.Action[i] == 'Check In' and player.loggedIn == False:
                         player.logins.append(df.Time[i] + timedelta(hours=self.timezone))
@@ -51,11 +48,11 @@ class Timesheet(QObject):
                         player.loggedIn = False
                         break
 
-        for player in self.players:
+        for player in playersDictionary.values():
             for i in range(0, min(len(player.logins),len(player.logouts))):
                 player.loggedTime = player.loggedTime + (player.logouts[i] - player.logins[i])
 
-        self.players.sort(key=lambda x: x.loggedTime, reverse=True)
+        self.players = sorted(playersDictionary.values(), key=lambda x: x.loggedTime, reverse=True)
         for player in self.players:
             if player.loggedTime > datetime.timedelta(0):
                 self.timesheetString += f"{str(player.loggedTime).rjust(17)}     {player.name}\n"
