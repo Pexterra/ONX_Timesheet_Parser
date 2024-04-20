@@ -53,7 +53,7 @@ class Timesheet(QObject):
 
         for player in sortedPlayers:
             if player.loggedTime > datetime.timedelta(0):
-                self.timesheetString += self._getTimedeltaStringHM(player.loggedTime).ljust(10) + f"\t - {player.name}\n"
+                self.timesheetString += f"{self._getTimedeltaStringHM(player.loggedTime):<10}\t - {player.name}\n"
                 self.displayedPlayers.append(player.name)
 
         self.displayedPlayers.append("Overview")
