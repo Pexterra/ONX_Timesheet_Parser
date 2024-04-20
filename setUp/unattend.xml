@@ -1,0 +1,7 @@
+<Options>
+    <Option Name="InstallAllUsers" Value="yes" />
+    <Option Name="Include_launcher" Value="no" />
+    <Option Name="Include_test" Value="no" />
+	<Option Name="Include_debug" Value="no" />
+	<Option Name="Include_tcltk" Value="no" />
+</Options>
