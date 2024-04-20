@@ -26,16 +26,17 @@ class Timesheet(QObject):
         self.timesheetString = ""
         self.displayedPlayers: List[str] = []
         self.timezone = 0
+        self.players: Dict[str, Player] = {}
 
     @Slot(str)
     def loadCSV(self, file: str) -> None:
         xls = pd.ExcelFile(file)
         df = xls.parse('Actions', skiprows=3, skipcolumns=1)
 
-        playersDictionary: Dict[str, Player] = {name: Player(name) for name in df['Name'].unique()}
+        self.players = {name: Player(name) for name in df['Name'].unique()}
 
         for i in range(0, len(df.Action)):
-            player = playersDictionary[df.Name[i]]
+            player = self.players[df.Name[i]]
             if df.Action[i] == 'Check In' and player.loggedIn == False:
                 player.logins.append(df.Time[i] + timedelta(hours=self.timezone))
                 player.loggedIn = True
@@ -45,12 +46,12 @@ class Timesheet(QObject):
                 # If they were logged in, then logged out we can use last logout and login to calculate time without re-looping
                 player.loggedTime = player.loggedTime + (player.logouts[-1] - player.logins[-1])
 
-        self.players = sorted(playersDictionary.values(), key=lambda x: x.loggedTime, reverse=True)
+        sortedPlayers = sorted(self.players.values(), key=lambda x: x.loggedTime, reverse=True)
 
         self.timesheetString = ""
         self.displayedPlayers = []
 
-        for player in self.players:
+        for player in sortedPlayers:
             if player.loggedTime > datetime.timedelta(0):
                 self.timesheetString += self._getTimedeltaStringHM(player.loggedTime).ljust(10) + f"\t - {player.name}\n"
                 self.displayedPlayers.append(player.name)
@@ -76,14 +77,13 @@ class Timesheet(QObject):
             return self.timesheetString
         else:
             output = ""
-            for player in self.players:
-                if player.name == playerSelection:
-                    output += f"{player.name} - clocked time: {self._getTimedeltaStringHM(player.loggedTime)}\n\n"
-                    output += f"UTC{self.timezone}" + '\n'
-                    for i in range(0, min(len(player.logins),len(player.logouts))):
-                        output += f"in: {str(player.logins[i])}  -  out: {str(player.logouts[i])}"
-                        output += f" - {self._getTimedeltaStringHM(player.logouts[i] - player.logins[i])}"
-                        output += "\n"
+            player = self.players[playerSelection]
+            output += f"{player.name} - clocked time: {self._getTimedeltaStringHM(player.loggedTime)}\n\n"
+            output += f"UTC{self.timezone}" + '\n'
+            for i in range(0, min(len(player.logins),len(player.logouts))):
+                output += f"in: {str(player.logins[i])}  -  out: {str(player.logouts[i])}"
+                output += f" - {self._getTimedeltaStringHM(player.logouts[i] - player.logins[i])}"
+                output += "\n"
             return output
 
     def _getTimedeltaStringHM(self, delta: timedelta) -> str:
