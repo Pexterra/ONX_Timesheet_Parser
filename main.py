@@ -1,6 +1,6 @@
 import sys, datetime, math
 import pandas as pd
-from typing import Dict
+from typing import Dict, List
 
 from datetime import timedelta
 from PySide6.QtCore import QObject, Slot
@@ -12,27 +12,26 @@ QML_IMPORT_NAME = "io.qt.textproperties"
 QML_IMPORT_MAJOR_VERSION = 1
 
 class Player(object):
-    def __init__(self, name):
+    def __init__(self, name: str):
         self.name = name
         self.loggedIn = False
         self.loggedTime = datetime.timedelta(0)
-        self.logins = []
-        self.logouts = []
+        self.logins: List[timedelta] = []
+        self.logouts: List[timedelta] = []
 
 @QmlElement
 class Timesheet(QObject):
     def __init__(self):
         super().__init__()
         self.timesheetString = ""
-        self.displayedPlayers = []
+        self.displayedPlayers: List[str] = []
         self.timezone = 0
 
     @Slot(str)
-    def loadCSV(self, file):
+    def loadCSV(self, file: str) -> None:
         xls = pd.ExcelFile(file)
-        timezone = xls.parse('Actions', index_col=3, )
         df = xls.parse('Actions', skiprows=3, skipcolumns=1)
-        
+
         playersDictionary: Dict[str, Player] = {name: Player(name) for name in df['Name'].unique()}
 
         for i in range(0, len(df.Action)):
@@ -47,10 +46,10 @@ class Timesheet(QObject):
                 player.loggedTime = player.loggedTime + (player.logouts[-1] - player.logins[-1])
 
         self.players = sorted(playersDictionary.values(), key=lambda x: x.loggedTime, reverse=True)
-        
+
         self.timesheetString = ""
         self.displayedPlayers = []
-        
+
         for player in self.players:
             if player.loggedTime > datetime.timedelta(0):
                 self.timesheetString += self._getTimedeltaStringHM(player.loggedTime).ljust(10) + f"\t - {player.name}\n"
@@ -60,19 +59,19 @@ class Timesheet(QObject):
         self.displayedPlayers.reverse()
 
     @Slot(str)
-    def setTimezone(self, timezone):
+    def setTimezone(self, timezone: str) -> None:
         self.timezone = int(timezone[-6:-3])
 
     @Slot(result=str)
-    def getTimesheet(self):
+    def getTimesheet(self) -> str:
         return self.timesheetString
 
     @Slot(result=list)
-    def getPlayers(self):
+    def getPlayers(self) -> List[str]:
         return self.displayedPlayers
 
     @Slot(str, result=str)
-    def getPlayerData(self, playerSelection):
+    def getPlayerData(self, playerSelection: str) -> str:
         if playerSelection == 'Overview':
             return self.timesheetString
         else:
@@ -87,7 +86,7 @@ class Timesheet(QObject):
                         output += "\n"
             return output
 
-    def _getTimedeltaStringHM(self, delta):
+    def _getTimedeltaStringHM(self, delta: timedelta) -> str:
         sec = delta.total_seconds()
         hours = math.ceil(sec // 3600)
         minutes = math.ceil((sec // 60) - (hours * 60))
