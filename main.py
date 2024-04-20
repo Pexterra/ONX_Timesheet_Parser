@@ -89,7 +89,7 @@ class Timesheet(QObject):
         sec = delta.total_seconds()
         hours, seconds_remaining = divmod(sec, 3600)
         minutes = math.ceil(seconds_remaining / 60)
-        return(f'{hours:>5}h {minutes:02}m')
+        return(f'{hours:>5.0f}h {minutes:02}m')
 
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
