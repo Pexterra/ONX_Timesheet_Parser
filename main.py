@@ -49,15 +49,12 @@ class Timesheet(QObject):
         sortedPlayers = sorted(self.players.values(), key=lambda x: x.loggedTime, reverse=True)
 
         self.timesheetString = ""
-        self.displayedPlayers = []
+        self.displayedPlayers = ["Overview"]
 
         for player in sortedPlayers:
             if player.loggedTime > datetime.timedelta(0):
                 self.timesheetString += f"{self._getTimedeltaStringHM(player.loggedTime):<10}\t - {player.name}\n"
                 self.displayedPlayers.append(player.name)
-
-        self.displayedPlayers.append("Overview")
-        self.displayedPlayers.reverse()
 
     @Slot(str)
     def setTimezone(self, timezone: str) -> None:
