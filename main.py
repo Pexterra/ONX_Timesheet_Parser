@@ -76,14 +76,16 @@ class Timesheet(QObject):
         if playerSelection == 'Overview':
             return self.timesheetString
         else:
-            output = ""
             player = self.players[playerSelection]
-            output += f"{player.name} - clocked time: {self._getTimedeltaStringHM(player.loggedTime)}\n\n"
-            output += f"UTC{self.timezone}" + '\n'
+            output = (
+                f"{player.name} - clocked time: {self._getTimedeltaStringHM(player.loggedTime)}\n\n"
+                f"UTC{self.timezone}" + '\n'
+            )
             for i in range(0, min(len(player.logins),len(player.logouts))):
-                output += f"in: {player.logins[i]}  -  out: {player.logouts[i]}"
-                output += f" - {self._getTimedeltaStringHM(player.logouts[i] - player.logins[i])}"
-                output += "\n"
+                output += (
+                    f"in: {player.logins[i]}  -  out: {player.logouts[i]}"
+                    f" - {self._getTimedeltaStringHM(player.logouts[i] - player.logins[i])}\n"
+                )
             return output
 
     def _getTimedeltaStringHM(self, delta: timedelta) -> str:
