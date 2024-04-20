@@ -81,20 +81,16 @@ class Timesheet(QObject):
             output += f"{player.name} - clocked time: {self._getTimedeltaStringHM(player.loggedTime)}\n\n"
             output += f"UTC{self.timezone}" + '\n'
             for i in range(0, min(len(player.logins),len(player.logouts))):
-                output += f"in: {str(player.logins[i])}  -  out: {str(player.logouts[i])}"
+                output += f"in: {player.logins[i]}  -  out: {player.logouts[i]}"
                 output += f" - {self._getTimedeltaStringHM(player.logouts[i] - player.logins[i])}"
                 output += "\n"
             return output
 
     def _getTimedeltaStringHM(self, delta: timedelta) -> str:
         sec = delta.total_seconds()
-        hours = math.ceil(sec // 3600)
-        minutes = math.ceil((sec // 60) - (hours * 60))
-        if minutes < 10:
-            minuteStr = "0" + str(minutes)
-        else:
-            minuteStr = str(minutes)
-        return(f'{str(hours).rjust(5)}h {minuteStr}m')
+        hours, seconds_remaining = divmod(sec, 3600)
+        minutes = math.ceil(seconds_remaining / 60)
+        return(f'{hours:>5}h {minutes:02}m')
 
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
