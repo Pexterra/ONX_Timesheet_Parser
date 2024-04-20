@@ -25,7 +25,7 @@ ApplicationWindow {
     FileDialog {
         id: fileDialog
         onAccepted: {
-            output.text = "data compilation in progress...\n(might take some time depending on table size)"
+            output.text = "something went wrong"
             timesheet.loadCSV(selectedFile)
             output.text = timesheet.getTimesheet()
             citizenSelection.model = timesheet.getPlayers()
