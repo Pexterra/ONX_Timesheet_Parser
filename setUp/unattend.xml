@@ -4,4 +4,5 @@
     <Option Name="Include_test" Value="no" />
 	<Option Name="Include_debug" Value="no" />
 	<Option Name="Include_tcltk" Value="no" />
+	<Option Name="AppendPath" Value="yes" />
 </Options>
