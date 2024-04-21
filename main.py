@@ -31,6 +31,8 @@ class Timesheet(QObject):
 
     @Slot(str)
     def loadCSV(self, file: str) -> None:
+        self.players = {}
+        self.displayedPlayers = []
         xls = pd.ExcelFile(file)
         timezone = xls.parse('Actions', index_col=3, ).axes[1][2]
         timezone = int(timezone[-2:]) - self.timezone
