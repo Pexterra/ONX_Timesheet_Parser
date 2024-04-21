@@ -1,6 +1,6 @@
 import sys, datetime, math
 import pandas as pd
-from typing import Dict
+from typing import Dict, List
 
 from datetime import timedelta
 from PySide6.QtCore import QObject, Slot
@@ -8,36 +8,42 @@ from PySide6.QtGui import QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine, QmlElement
 from PySide6.QtQuickControls2 import QQuickStyle
 
-QML_IMPORT_NAME = "io.qt.textproperties"
+QML_IMPORT_NAME = "TimesheetParser"
 QML_IMPORT_MAJOR_VERSION = 1
 
 class Player(object):
-    def __init__(self, name):
+    def __init__(self, name: str, stateID: int):
         self.name = name
+        self.stateId = stateID
         self.loggedIn = False
         self.loggedTime = datetime.timedelta(0)
-        self.logins = []
-        self.logouts = []
+        self.logins: List[timedelta] = []
+        self.logouts: List[timedelta] = []
 
 @QmlElement
 class Timesheet(QObject):
     def __init__(self):
         super().__init__()
         self.timesheetString = ""
-        self.displayedPlayers = []
+        self.displayedPlayers: List[str] = []
         self.timezone = 0
+        self.players: Dict[str, Player] = {}
 
     @Slot(str)
-    def loadCSV(self, file):
+    def loadCSV(self, file: str) -> None:
         xls = pd.ExcelFile(file)
         timezone = xls.parse('Actions', index_col=3, ).axes[1][2]
         timezone = int(timezone[-2:]) - self.timezone
+
         df = xls.parse('Actions', skiprows=3, skipcolumns=1)
-        
-        playersDictionary: Dict[str, Player] = {name: Player(name) for name in df['Name'].unique()}
+        df.rename(columns=lambda x: x.replace(' ', ''), inplace=True)
+
+        uniqueDF = df[['StateID', 'Name']].drop_duplicates()
+        for entry in uniqueDF.values:
+            self.players[entry[1]] = Player(entry[1], entry[0])
 
         for i in range(0, len(df.Action)):
-            player = playersDictionary[df.Name[i]]
+            player = self.players[df.Name[i]]
             if df.Action[i] == 'Check In' and player.loggedIn == False:
                 player.logins.append(df.Time[i] + timedelta(hours=timezone))
                 player.loggedIn = True
@@ -47,56 +53,53 @@ class Timesheet(QObject):
                 # If they were logged in, then logged out we can use last logout and login to calculate time without re-looping
                 player.loggedTime = player.loggedTime + (player.logouts[-1] - player.logins[-1])
 
-        self.players = sorted(playersDictionary.values(), key=lambda x: x.loggedTime, reverse=True)
-        
+        sortedPlayers = sorted(self.players.values(), key=lambda x: x.loggedTime, reverse=True)
+
         self.timesheetString = ""
-        self.displayedPlayers = []
-        
-        for player in self.players:
+        self.displayedPlayers = ["Overview"]
+
+        for player in sortedPlayers:
             if player.loggedTime > datetime.timedelta(0):
-                self.timesheetString += self._getTimedeltaStringHM(player.loggedTime).ljust(10) + f"\t - {player.name}\n"
-                self.displayedPlayers.append(player.name)
+                self.timesheetString += f"{self._getTimedeltaStringHM(player.loggedTime):<10}\t- {player.name} [#{player.stateId}]\n"
+                self.displayedPlayers.append(f'{player.name} [#{player.stateId}]')
 
         self.displayedPlayers = sorted(self.displayedPlayers, key=lambda x: x, reverse=False)
         self.displayedPlayers.insert(0, "Overview")
 
     @Slot(str)
-    def setTimezone(self, timezone):
+    def setTimezone(self, timezone: str) -> None:
         self.timezone = int(timezone[-6:-3])
 
     @Slot(result=str)
-    def getTimesheet(self):
+    def getTimesheet(self) -> str:
         return self.timesheetString
 
     @Slot(result=list)
-    def getPlayers(self):
+    def getPlayers(self) -> List[str]:
         return self.displayedPlayers
 
     @Slot(str, result=str)
-    def getPlayerData(self, playerSelection):
+    def getPlayerData(self, playerSelection: str) -> str:
         if playerSelection == 'Overview':
             return self.timesheetString
         else:
-            output = ""
-            for player in self.players:
-                if player.name == playerSelection:
-                    output += f"{player.name} - clocked time: {self._getTimedeltaStringHM(player.loggedTime)}\n\n"
-                    output += f"UTC{self.timezone}" + '\n'
-                    for i in range(0, min(len(player.logins),len(player.logouts))):
-                        output += f"in: {str(player.logins[i])}  -  out: {str(player.logouts[i])}"
-                        output += f" - {self._getTimedeltaStringHM(player.logouts[i] - player.logins[i])}"
-                        output += "\n"
+            player = self.players[playerSelection[:playerSelection.find('[')-1]]
+            output = (
+                f"{player.name} [#{player.stateId}] - clocked time: {self._getTimedeltaStringHM(player.loggedTime)}\n\n"
+                f"UTC{self.timezone}" + '\n'
+            )
+            for i in range(0, min(len(player.logins),len(player.logouts))):
+                output += (
+                    f"in: {player.logins[i]}  -  out: {player.logouts[i]}"
+                    f" - {self._getTimedeltaStringHM(player.logouts[i] - player.logins[i])}\n"
+                )
             return output
 
-    def _getTimedeltaStringHM(self, delta):
+    def _getTimedeltaStringHM(self, delta: timedelta) -> str:
         sec = delta.total_seconds()
-        hours = math.ceil(sec // 3600)
-        minutes = math.ceil((sec // 60) - (hours * 60))
-        if minutes < 10:
-            minuteStr = "0" + str(minutes)
-        else:
-            minuteStr = str(minutes)
-        return(f'{str(hours).rjust(5)}h {minuteStr}m')
+        hours, seconds_remaining = divmod(sec, 3600)
+        minutes = math.floor(seconds_remaining / 60)
+        return(f'{hours:>5.0f}h {minutes:02}m')
 
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)

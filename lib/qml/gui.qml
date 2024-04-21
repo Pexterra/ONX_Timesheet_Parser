@@ -5,7 +5,7 @@ import QtQuick.Window 2.1
 import QtQuick.Controls.Material 2.1
 import QtQuick.Dialogs
 
-import io.qt.textproperties 1.0
+import TimesheetParser 1.0
 
 ApplicationWindow {
     id: page
