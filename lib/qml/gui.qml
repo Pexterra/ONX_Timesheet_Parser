@@ -31,6 +31,7 @@ ApplicationWindow {
             citizenSelection.model = timesheet.getPlayers()
             citizenSelection.visible = true
             citizenSelectionLabel.visible = true
+            citizenSelection.currentIndex = 0
         }
     }
     RowLayout {

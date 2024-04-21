@@ -58,7 +58,6 @@ class Timesheet(QObject):
         sortedPlayers = sorted(self.players.values(), key=lambda x: x.loggedTime, reverse=True)
 
         self.timesheetString = ""
-        self.displayedPlayers = ["Overview"]
 
         for player in sortedPlayers:
             if player.loggedTime > datetime.timedelta(0):
