@@ -5,7 +5,7 @@ import QtQuick.Window 2.1
 import QtQuick.Controls.Material 2.1
 import QtQuick.Dialogs
 
-import io.qt.textproperties 1.0
+import TimesheetParser 1.0
 
 ApplicationWindow {
     id: page
@@ -16,7 +16,7 @@ ApplicationWindow {
     visible: true
     Material.theme: Material.Dark
     Material.accent: Material.Purple
-    title: qsTr("ONX Excel Parser")
+    title: qsTr("ONX Timesheet Parser")
 
     Timesheet {
         id: timesheet
@@ -25,12 +25,13 @@ ApplicationWindow {
     FileDialog {
         id: fileDialog
         onAccepted: {
-            output.text = "data compilation in progress...\n(might take some time depending on table size)"
+            output.text = "something went wrong"
             timesheet.loadCSV(selectedFile)
             output.text = timesheet.getTimesheet()
             citizenSelection.model = timesheet.getPlayers()
             citizenSelection.visible = true
             citizenSelectionLabel.visible = true
+            citizenSelection.currentIndex = 0
         }
     }
     RowLayout {
